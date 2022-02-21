@@ -4,9 +4,11 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import theStore from "./store";
+
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <App store={theStore}/>
   </React.StrictMode>,
   document.getElementById('root')
 );

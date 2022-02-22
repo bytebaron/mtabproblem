@@ -30,6 +30,7 @@ function EditColumn ({ value, onChange, rowData, setCurrentRowID, setOpen}) {
     <span>
       {value}
       <IconButton size="sm" onClick={(event) => {
+        theStore.onChange = onChange; 
         setOpen(true);
         setCurrentRowID(rowData.id)
       }}
@@ -106,7 +107,9 @@ function App({ store }) {
   
 
   const closeAndUpdate = () => {
-    theStore.updateValue(currentSelectedRowId, currentSelectedRowValue, currentRowID);
+    // theStore.updateValue(currentSelectedRowId, currentSelectedRowValue, currentRowID);
+    theStore.onChange(currentSelectedRowValue);
+    
     setOpen(false);
   }
 

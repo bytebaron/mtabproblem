@@ -1,5 +1,5 @@
 import "./App.css";
-import { React, useState } from "react";
+import { React, useCallback, useState } from "react";
 import MaterialTable from "@material-table/core";
 import { observer } from "mobx-react";
 import { makeStyles } from "@material-ui/core";
@@ -25,22 +25,28 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+function EditColumn ({ value, onChange, onChangeToState }) {
+  return (
+    <span>
+      {value}
+      <IconButton size="sm" onClick={(event) => {
+        onChangeToState(onChange);
+      }}
+      >
+        <EditIcon />
+      </IconButton>
+    </span>
+  )
+}
+
 function App({ store }) {
   const [open, setOpen] = useState(false);
+  const [currentRow, setCurrentRow] = useState('');
+  const [selectedRowId, setSelectedRowId] = useState();
+  const [currentOnChange, setCurrentOnChange] = useState(null); 
   const classes = useStyles();
 
-  function EditColumn({ value, onChange }) {
-    return (
-      <span>
-        {value}
-        <IconButton size="sm" onClick={() => setOpen(true)}>
-          <EditIcon />
-        </IconButton>
-      </span>
-    )
-  }
-
-  const columns = [
+  const [columns, setColumns] = useState([
     {
       title: "Col1",
       field: "col1"
@@ -52,15 +58,55 @@ function App({ store }) {
     {
       title: "Col3",
       field: "col3",
-      editComponent: (props) => <EditColumn {...props} />
+      editComponent: (props) => <EditColumn {...props} onChangeToState={onChangeToState} />
     }
-  ];
+  ]);
+
+  const columns2 = [
+    {
+      title: "Col1",
+      field: "col1"
+    },
+    {
+      title: "Col2",
+      field: "col2"
+    },
+    {
+      title: "Col3",
+      field: "col3",
+    }
+  ]
 
   const body = (
     <div className={classes.paper}>
-      <p>hi</p>
+      <MaterialTable
+        columns={columns2}
+        data={store.data}
+        options={{
+          rowStyle: rowData => ({
+            backgroundColor:
+            rowData.tableData.id === selectedRowId ? "blue" : "#fff" 
+          })
+        }}
+        onRowClick={(event, rowData) => {
+          console.log(`rowdata ${JSON.stringify(rowData.col3)}`)
+          setCurrentRow(rowData.col3);
+          setSelectedRowId(rowData.id)
+        }}
+          
+      />
+      <button onClick={() => closeAndUpdate()}>close and change</button>
     </div>
   )
+
+  const onChangeToState = (onChange) => {
+    setOpen(true); 
+    setCurrentOnChange(onChange); 
+  }
+
+  const closeAndUpdate = () => {
+    currentOnChange(currentRow);
+  }
 
   return (
     <>

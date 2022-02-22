@@ -25,12 +25,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function EditColumn ({ value, onChange, onChangeToState }) {
+function EditColumn ({ value, onChange, rowData, setCurrentRowID, setOpen}) {
   return (
     <span>
       {value}
       <IconButton size="sm" onClick={(event) => {
-        onChangeToState(onChange);
+        setOpen(true);
+        setCurrentRowID(rowData.id)
       }}
       >
         <EditIcon />
@@ -41,9 +42,9 @@ function EditColumn ({ value, onChange, onChangeToState }) {
 
 function App({ store }) {
   const [open, setOpen] = useState(false);
-  const [currentRow, setCurrentRow] = useState('');
-  const [selectedRowId, setSelectedRowId] = useState();
-  const [currentOnChange, setCurrentOnChange] = useState(null); 
+  const [currentRowID, setCurrentRowID] = useState(null);
+  const [currentSelectedRowValue, setCurrentSelectedRowValue] = useState(null);
+  const [currentSelectedRowId, setCurrentSelectedRowId] = useState(null);
   const classes = useStyles();
 
   const [columns, setColumns] = useState([
@@ -58,7 +59,7 @@ function App({ store }) {
     {
       title: "Col3",
       field: "col3",
-      editComponent: (props) => <EditColumn {...props} onChangeToState={onChangeToState} />
+      editComponent: (props) => <EditColumn {...props} setOpen={setOpen} setCurrentRowID={setCurrentRowID} />
     }
   ]);
 
@@ -77,35 +78,36 @@ function App({ store }) {
     }
   ]
 
-  const body = (
-    <div className={classes.paper}>
-      <MaterialTable
-        columns={columns2}
-        data={store.data}
-        options={{
-          rowStyle: rowData => ({
-            backgroundColor:
-            rowData.tableData.id === selectedRowId ? "blue" : "#fff" 
-          })
-        }}
-        onRowClick={(event, rowData) => {
-          console.log(`rowdata ${JSON.stringify(rowData.col3)}`)
-          setCurrentRow(rowData.col3);
-          setSelectedRowId(rowData.id)
-        }}
-          
-      />
-      <button onClick={() => closeAndUpdate()}>close and change</button>
-    </div>
-  )
+  // const body = (
+    
+  // )
 
-  const onChangeToState = (onChange) => {
-    setOpen(true); 
-    setCurrentOnChange(onChange); 
-  }
+  const body = (
+      <div className={classes.paper}>
+        <MaterialTable
+          columns={columns2}
+          data={store.data2}
+          options={{
+            rowStyle: rowData => ({
+              backgroundColor:
+              rowData.tableData.id === currentSelectedRowId ? "blue" : "#fff" 
+            })
+          }}
+          onRowClick={(event, rowData) => {
+            console.log(`rowdata ${JSON.stringify(rowData.col3)}`)
+            setCurrentSelectedRowValue(rowData.col3);
+            setCurrentSelectedRowId(rowData.id)
+          }}
+            
+        />
+        <button onClick={() => closeAndUpdate()}>close and change</button>
+     </div>
+    )
+  
 
   const closeAndUpdate = () => {
-    currentOnChange(currentRow);
+    theStore.updateValue(currentSelectedRowId, currentSelectedRowValue, currentRowID);
+    setOpen(false);
   }
 
   return (
@@ -123,7 +125,7 @@ function App({ store }) {
     <div className="App">
       <MaterialTable
         columns={columns}
-        data={store.data}
+        data={theStore.data}
         editable={{
           onRowUpdate: (newData) => {
             theStore.updateRow(newData);
